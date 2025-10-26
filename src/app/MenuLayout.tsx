@@ -121,7 +121,7 @@ export function MenuLayout({
                   key: '/points/request',
                   label: '상점 요청',
                   icon: <MailOutlined />,
-                  disabled: data.type !== 'enlisted',
+                  disabled: ((data as { type?: 'enlisted' | 'nco' } | null)?.type ?? 'nco') !== 'enlisted',
                   onClick,
                 },
                 {
