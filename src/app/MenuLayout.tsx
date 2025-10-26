@@ -69,7 +69,7 @@ export function MenuLayout({
         : [
             {
               key: '/soldiers',
-              label: data.name ?? '',
+              label: (data as { name?: string; permissions?: any })?.name ?? '',
               icon: <UserOutlined />,
               onClick,
             },
