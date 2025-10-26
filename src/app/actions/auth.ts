@@ -97,7 +97,7 @@ export async function signIn({
     {
       name: data.name,
       sub: sn,
-      type: data.type,
+      type: (data as { type?: string | null })?.type ?? null,
     },
     process.env.JWT_SECRET_KEY!,
     {
