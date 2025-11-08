@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "kysely-codegen --url='env(POSTGRES_URL)' --dialect=postgres && next build",
+    "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate": "kysely-codegen --url=\"$DATABASE_URL\" --dialect=postgres"
   },
   "dependencies": {
     "@ant-design/cssinjs": "^1.21.0",
