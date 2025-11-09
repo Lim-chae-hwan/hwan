@@ -34,7 +34,7 @@ function renderTitle(pathname: string) {
   if (pathname in title) {
     return title[pathname as keyof typeof title];
   }
-  return '병영생활 관리';
+  return '9탄약창 상벌점 관리';
 }
 
 export function MenuLayout({
@@ -226,7 +226,7 @@ export function MenuLayout({
             <Layout.Content>{children}</Layout.Content>
             <Layout.Footer style={{ textAlign: 'center' }}>
               <span className='text-black font-bold'>
-                ©{new Date().getFullYear()} 키보드워리어
+                ©{new Date().getFullYear()} 탄약 2소대장 임채환
               </span>
             </Layout.Footer>
           </Layout>

@@ -7,7 +7,7 @@ import { AntDesignRegistry } from './registry';
 export const metadata: Metadata = {
   title: '9탄약창 상벌점 관리',
   description: '제9탄약창 상벌점 관리 시스템',
-  authors: { name: 'Keyboard Warrior Club' },
+  authors: { name: '탄약 2소대장 임채환' },
 };
 
 export function generateViewport() {

@@ -31,7 +31,7 @@ export default function LoginPage() {
         src='/images/flag.svg'
         alt='Divison Logo'
       />
-      <h1 className='text-center font-black text-3xl'>병영생활 관리</h1>
+      <h1 className='text-center font-black text-3xl'>9탄약창 상벌점 관리</h1>
       <Form
         onFinish={onSubmit}
         className='flex flex-col gap-2 w-full max-w-sm'
