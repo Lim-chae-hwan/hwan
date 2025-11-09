@@ -5,8 +5,8 @@ import './globals.css';
 import { AntDesignRegistry } from './registry';
 
 export const metadata: Metadata = {
-  title: '병영생활 관리',
-  description: '제2신속대응사단 병영생활 관리',
+  title: '9탄약창 상벌점 관리',
+  description: '제9탄약창 상벌점 관리 시스템',
   authors: { name: 'Keyboard Warrior Club' },
 };
 
@@ -26,7 +26,7 @@ export default async function RootLayout({
 }) {
   const data = await unauthenticated_currentSoldier();
   return (
-    <html lang='ko'>
+    <html lang="ko">
       <body>
         <AntDesignRegistry>
           <MenuLayout data={data}>{children}</MenuLayout>
