@@ -47,9 +47,14 @@ export interface Points {
   receiver_id: string;
   rejected_at: Timestamp | null;
   rejected_reason: string | null;
+
+  // 새로 추가: 어느 중대장 역할이 승인해야 하는지
+  commander_role: string | null;
+
   value: number;
   verified_at: Timestamp | null;
 }
+
 
 export interface PointTemplates {
   demerit: number | null;

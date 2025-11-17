@@ -12,6 +12,7 @@ import {
   UnlockOutlined,
   UserAddOutlined,
   UserOutlined,
+  CheckOutlined,
 } from '@ant-design/icons';
 import { App, Button, ConfigProvider, Layout, Menu, MenuProps } from 'antd';
 import locale from 'antd/locale/ko_KR';
@@ -24,7 +25,8 @@ import { currentSoldier, signOut } from './actions';
 const title = {
   '/points': '상점 관리',
   '/points/request': '상점 요청',
-  '/points/give': '상점 부여',
+  '/points/give': '상벌점 부여',
+  '/points/approve': '상벌점 승인',
   '/points/redeem': '상점 사용',
   '/soldiers/list': '유저 관리',
   '/soldiers/signup': '회원가입 관리',
@@ -87,7 +89,9 @@ export function MenuLayout({
                     _.intersection(data.permissions, [
                       'Admin',
                       'UserAdmin',
-                      'ListUser',
+                      'AmmoCommander',
+                      'GuardCommander',
+                      'HqCommander',
                     ]).length === 0,
                   onClick,
                 },
@@ -126,7 +130,7 @@ export function MenuLayout({
                 },
                 {
                   key: '/points/give',
-                  label: '상점 부여',
+                  label: '상벌점 부여',
                   icon: <SendOutlined />,
                   onClick,
                   disabled:
@@ -139,6 +143,22 @@ export function MenuLayout({
                       'GiveLargeDemeritPoint',
                     ]).length === 0,
                 },
+
+                {
+                  key: '/points/approve',
+                  label: '상벌점 승인',
+                  icon: <CheckOutlined />,
+                  onClick,
+                  disabled:
+                    _.intersection(data.permissions, [
+                      'Admin',
+                      'PointAdmin',
+                      'AmmoCommander',
+                      'GuardCommander',
+                      'HqCommander',
+                    ]).length === 0,
+                },
+
                 {
                   key: '/points/redeem',
                   label: '상점 사용',

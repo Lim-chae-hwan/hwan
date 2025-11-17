@@ -4,6 +4,7 @@ import { sql } from 'kysely';
 import { kysely } from './kysely';
 import { currentSoldier, fetchSoldier } from './soldiers';
 import { checkIfSoldierHasPermission, hasPermission } from './utils';
+import type { Permission } from '@/interfaces';
 
 export async function fetchPoint(pointId: number) {
   return kysely
@@ -49,15 +50,49 @@ export async function listPoints(sn: string, page: number = 0) {
 }
 
 export async function fetchPendingPoints() {
-  const { sn } = await currentSoldier();
-  return kysely
+  const current = await currentSoldier();
+
+  // 공통: 아직 승인/반려 안 된 상벌점
+  let query = kysely
     .selectFrom('points')
-    .where('giver_id', '=', sn!)
     .where('verified_at', 'is', null)
-    .where('rejected_at', 'is', null)
+    .where('rejected_at', 'is', null);
+
+  // ✅ 0) Admin 은 전체 미승인 상벌점 다 볼 수 있게
+  const isAdmin = current.permissions.includes('Admin');
+  if (isAdmin) {
+    return query.selectAll().execute();
+  }
+
+  // ✅ 1) 중대장 권한 이름들
+  const commanderPerms: Permission[] = [
+    'AmmoCommander',
+    'GuardCommander',
+    'HqCommander',
+  ];
+
+  // ✅ 2) 내가 가진 중대장 권한만 추림
+  const myCommanderPerms = commanderPerms.filter((perm) =>
+    current.permissions.includes(perm),
+  );
+
+  if (myCommanderPerms.length > 0) {
+    // ✅ 3) 중대장인 경우: 본인 역할(commander_role)에 해당하는 것만
+    return query
+      .where('commander_role', 'in', myCommanderPerms as readonly string[])
+      .selectAll()
+      .execute();
+  }
+
+  // ✅ 4) 중대장이 아닌 간부: 병사가 "나한테" 요청한 것만
+  // (설계상 soldier가 요청할 때 수여자 군번을 giver_id 로 넣는 구조라면 OK)
+  return query
+    .where('giver_id', '=', current.sn!)
+    .where('commander_role', 'is', null)
     .selectAll()
     .execute();
 }
+
 
 export async function deletePoint(pointId: number) {
   const { type, sn } = await currentSoldier();
@@ -94,27 +129,49 @@ export async function verifyPoint(
     fetchPoint(pointId),
     currentSoldier(),
   ]);
+
   if (point == null) {
     return { message: '본 상벌점이 존재하지 않습니다' };
   }
-  if (point.giver_id !== current.sn) {
-    return { message: '본인한테 요청된 상벌점만 승인/반려 할 수 있십니다' };
-  }
+
   if (current.type === 'enlisted') {
     return { message: '용사는 상벌점을 승인/반려 할 수 없습니다' };
   }
+
   if (!value && rejectReason == null) {
     return { message: '반려 사유를 입력해주세요' };
   }
-  if (value) {
-    const { message } = checkIfSoldierHasPermission(
-      point.value,
-      current.permissions,
-    );
-    if (message) {
-      return { message };
+
+  // ✅ commander_role 이 있으면 = 중대장 승인 단계
+  const isCommanderApproval = point.commander_role != null;
+
+  if (isCommanderApproval) {
+    // 간부가 입력했고, 중대장이 최종 승인해야 하는 상벌점
+    const commanderRole = point.commander_role as Permission;
+
+    // 현재 사용자가 해당 중대장 권한을 가지고 있어야 승인 가능
+    if (!hasPermission(current.permissions, [commanderRole])) {
+      return { message: '해당 상벌점을 승인할 권한이 없습니다' };
+    }
+
+    // 점수 한도는 간부가 올릴 때(createPoint) 이미 체크했으니 여기선 안 해도 됨
+  } else {
+    // ✅ 병사가 요청한 상벌점: 기존 구조 유지
+    if (point.giver_id !== current.sn) {
+      return { message: '본인한테 요청된 상벌점만 승인/반려 할 수 있습니다' };
+    }
+
+    if (value) {
+      const { message } = checkIfSoldierHasPermission(
+        point.value,
+        current.permissions,
+      );
+      if (message) {
+        return { message };
+      }
     }
   }
+
   try {
     await kysely
       .updateTable('points')
@@ -166,12 +223,15 @@ export async function createPoint({
   receiverId,
   reason,
   givenAt,
+  commanderRole,
 }: {
   value: number;
   giverId?: string | null;
   receiverId?: string | null;
   reason: string;
   givenAt: Date;
+  // 중대장 승인 대상 역할 (탄약/경비/본부 중대장)
+  commanderRole?: string | null;
 }) {
   if (reason.trim() === '') {
     return { message: '상벌점 수여 이유를 작성해주세요' };
@@ -182,6 +242,7 @@ export async function createPoint({
   if (value === 0) {
     return { message: '1점 이상이거나 -1점 미만이어야합니다' };
   }
+
   const { type, sn, permissions } = await currentSoldier();
   if (
     (type === 'enlisted' && giverId == null) ||
@@ -189,12 +250,15 @@ export async function createPoint({
   ) {
     return { message: '대상을 입력해주세요' };
   }
+
   const target = await fetchSoldier(
     type === 'enlisted' ? giverId! : receiverId!,
   );
   if (target == null) {
     return { message: '대상이 존재하지 않습니다' };
   }
+
+  // ✅ 용사가 요청하는 경우 → 기존 로직 그대로 (간부 승인 대기)
   if (type === 'enlisted') {
     if (giverId === sn) {
       return { message: '스스로에게 수여할 수 없습니다' };
@@ -216,20 +280,33 @@ export async function createPoint({
       return { message: '알 수 없는 오류가 발생했습니다' };
     }
   }
+
+  // ✅ 간부가 상벌점을 부여하는 경우 (중대장 승인 대기)
   const { message } = checkIfSoldierHasPermission(value, permissions);
   if (message) {
     return { message };
   }
+
+  // 어떤 중대장이 승인할지 반드시 선택해야 함
+  if (!commanderRole) {
+    return { message: '승인받을 중대장을 선택해주세요' };
+  }
+
   try {
     await kysely
       .insertInto('points')
       .values({
         receiver_id: receiverId!,
         reason,
-        giver_id: sn!,
+        giver_id: sn!, // 실제 상점을 입력한 간부
         given_at: givenAt,
         value,
-        verified_at: new Date(),
+        // 중대장 승인 전이므로 아직 최종 승인 X
+        verified_at: null,
+        rejected_at: null,
+        rejected_reason: null,
+        // 어느 중대장(역할)이 승인해야 하는지 저장
+        commander_role: commanderRole,
       })
       .executeTakeFirstOrThrow();
     return { message: null };

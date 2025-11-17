@@ -36,6 +36,9 @@ export const Permission = z.enum([
   'GiveDemeritPoint',
   'GiveLargeDemeritPoint',
   'UsePoint',
+  'AmmoCommander',
+  'GuardCommander',
+  'HqCommander',
 ]);
 
 export type Permission = z.infer<typeof Permission>;

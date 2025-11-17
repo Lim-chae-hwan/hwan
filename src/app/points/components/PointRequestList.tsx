@@ -1,24 +1,11 @@
 import { fetchPendingPoints } from '@/app/actions';
-import { Empty } from 'antd';
 import { PointRequestCard } from '.';
+import { PointRequestListInner } from './PointRequestListInner';
 
 export async function PointRequestList() {
   const data = await fetchPendingPoints();
 
-  if (data.length === 0) {
-    return (
-      <div className='py-5 my-5'>
-        <Empty
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={<p>요청된 상벌점이 없습니다</p>}
-        />
-      </div>
-    );
-  }
-  return data.map(({ id }) => (
-    <PointRequestCard
-      key={id}
-      pointId={id}
-    />
-  ));
+  // ❗ 여기서는 데이터만 가져오고,
+  // 화면 렌더링은 클라이언트 컴포넌트(PointRequestListInner)가 담당합니다.
+  return <PointRequestListInner data={data} />;
 }

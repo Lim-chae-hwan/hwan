@@ -60,4 +60,16 @@ export const ALL_PERMISSIONS: {
     key: 'GiveLargeDemeritPoint',
     title: '5점 초과 벌점 부여',
   },
+  AmmoCommander: {
+    key: 'AmmoCommander',
+    title: '탄약 중대장 권한',
+  },
+  GuardCommander: {
+    key: 'GuardCommander',
+    title: '경비 중대장 권한',
+  },
+  HqCommander: {
+    key: 'HqCommander',
+    title: '본부 중대장 권한',
+  },
 };

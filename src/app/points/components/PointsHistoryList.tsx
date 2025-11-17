@@ -1,12 +1,11 @@
-import { Empty } from 'antd';
+'use client';
+
+import Empty from 'antd/es/empty';
 import { PointCard } from './PointCard';
 
 export type PointsHistoryListProps = { type: string; data: { id: number }[] };
 
-export async function PointsHistoryList({
-  data,
-  type,
-}: PointsHistoryListProps) {
+export function PointsHistoryList({ data, type }: PointsHistoryListProps) {
   if (data.length === 0) {
     return (
       <div className='py-5 my-5'>
@@ -23,10 +22,12 @@ export async function PointsHistoryList({
       </div>
     );
   }
-  return data.map(({ id }) => (
-    <PointCard
-      key={id}
-      pointId={id}
-    />
-  ));
+
+  return (
+    <>
+      {data.map(({ id }) => (
+        <PointCard key={id} pointId={id} />
+      ))}
+    </>
+  );
 }

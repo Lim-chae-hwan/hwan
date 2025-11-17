@@ -18,7 +18,6 @@ import {
 import locale from 'antd/es/date-picker/locale/ko_KR';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { PointTemplatesInput } from '../components';
 import { checkIfNco } from '../give/actions';
 
 export type ManagePointFormProps = {
@@ -37,6 +36,12 @@ export function ManagePointForm({ type }: ManagePointFormProps) {
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
   const { message } = App.useApp();
+  
+  const commanderOptions = [
+    { label: '탄약 중대장', value: 'AmmoCommander' },
+    { label: '경비 중대장', value: 'GuardCommander' },
+    { label: '본부 중대장', value: 'HqCommander' },
+  ] as const;
 
   const renderPlaceholder = useCallback(
     ({ name, sn }: { name: string; sn: string }) => (
@@ -116,17 +121,7 @@ export function ManagePointForm({ type }: ManagePointFormProps) {
             locale={locale}
           />
         </Form.Item>
-        <Form.Item<string>>
-          <PointTemplatesInput
-            onChange={(reason, value) => {
-              form.setFieldValue('reason', reason);
-              if (value) {
-                setMerit(() => (value > 0 ? 1 : -1));
-                form.setFieldValue('value', Math.abs(value));
-              }
-            }}
-          />
-        </Form.Item>
+        
         <Form.Item<string>
           label={type === 'request' ? '수여자' : '수령자'}
           name={type === 'request' ? 'giverId' : 'receiverId'}
@@ -165,6 +160,20 @@ export function ManagePointForm({ type }: ManagePointFormProps) {
             }
           />
         </Form.Item>
+
+        {type === 'give' && (
+          <Form.Item
+            label="승인 받을 중대장"
+            name="commanderRole"
+            rules={[{ required: true, message: '승인받을 중대장을 선택해주세요' }]}
+          >
+            <Select 
+              options={commanderOptions as any}
+              placeholder="중대장을 선택하세요"
+            />
+          </Form.Item>
+        )}
+
         <Form.Item<string>
           name='reason'
           rules={[{ required: true, message: '지급이유를 입력해주세요' }]}

@@ -37,6 +37,7 @@ model points {
   given_at        DateTime  @db.Timestamp(0)
   rejected_at     DateTime? @db.Timestamp(0)
   rejected_reason String?   @db.VarChar(1000)
+  commander_role  String?   @db.VarChar(50)
 }
 
 model point_templates {
@@ -71,4 +72,5 @@ model soldiers {
 enum soldiers_type {
   enlisted
   nco
+  admin 
 }
