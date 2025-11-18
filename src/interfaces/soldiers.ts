@@ -7,9 +7,12 @@ import { Permission } from './permissions';
 export const Soldier = z.object({
   // 군번이자 ID (Military ID)
   sn: z
-    .string()
-    .trim()
-    .regex(/^\d{2}-\d{5,8}$/, { message: '유효하지 않은 군번 형식입니다' }),
+  .string()
+  .trim()
+  .regex(/^(?:\d{6}|\d{2}-\d{5,8})$/, {
+    message: '유효하지 않은 군번 형식입니다',
+  }),
+
 
   // 비밀번호 (Password)
   password: z
@@ -23,10 +26,10 @@ export const Soldier = z.object({
 
   // 이름 (Name)
   name: z
-    .string()
-    .trim()
-    .min(1, { message: '이름은 최소 1자 이상이어야 합니다' })
-    .max(5, { message: '이름은 최대 5자까지 가능합니다' }),
+  .string()
+  .trim()
+  .min(1, { message: '이름은 최소 1자 이상이어야 합니다' })
+  .max(15, { message: '이름은 최대 15자까지 가능합니다' }),
 
   // 유저 인증 날짜 / 인증되지 않은 경우 null
   verified_at: z.date().nullable(),

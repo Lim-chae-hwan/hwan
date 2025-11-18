@@ -5,7 +5,6 @@ import { LeftOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Divider, Form, Input, Radio, message } from 'antd';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
-import { withMask } from 'use-mask-input';
 import { SignUpForm } from './interfaces';
 
 export default function SignUpPage() {
@@ -53,9 +52,7 @@ export default function SignUpPage() {
             style={{ flex: 1 }}
           >
             <Input
-              ref={(ref) =>
-                withMask('99-99999[999]', { placeholder: '' })(ref?.input!)
-              }
+            
               type='text'
               placeholder='군번'
               prefix={<UserOutlined />}
